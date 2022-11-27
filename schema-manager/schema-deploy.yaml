@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: schema-manager
+spec:
+  template:
+    spec:
+      serviceAccountName: spark
+      containers:
+      - image: schema-manager:latest
+        name: schema-manager
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: IMAGE
+            value: schema-manager:latest
+          - name: SPARK_MASTER_URL
+            value: k8s://https://kubernetes.docker.internal:6443
+          - name: DEPLOY_MODE
+            value: cluster
+        envFrom:
+          - secretRef:
+              name: dbcred
+      restartPolicy: Never
+  backoffLimit: 4

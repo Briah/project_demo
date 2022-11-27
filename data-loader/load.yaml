@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: data-loader-job
+  labels:
+    name: data-loader
+spec:
+  template:
+    spec:
+      serviceAccountName: spark
+      containers:
+      - image: data-loader:latest
+        name: data-loader-job
+        imagePullPolicy: IfNotPresent
+        env:
+            - name: JOB_NAME
+              value: "data-loader-job"
+            - name: SPARK_MASTER_URL
+              value: "k8s://https://kubernetes.docker.internal:6443"
+            - name: DEPLOY_MODE
+              value: cluster
+            - name: DRIVER_MEMORY
+              value: "1G"
+            - name: EXEC_MEMORY
+              value: "1G"
+            - name: NUM_EXECS
+              value: "1"
+            - name: DOCKER_IMAGE
+              value: data-loader:latest
+            - name: KEYSPACE
+              value: demo
+            # - name: TABLE_NAME
+            #   value: store
+            # - name: FILENAME
+            #   value: "store.csv"
+        envFrom:
+          - secretRef:
+              name: dbcred
+        command: ["./run.sh"]
+        args: []
+      restartPolicy: Never
+  backoffLimit: 4

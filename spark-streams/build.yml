@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  sbt:
+    image: sbt-builder
+    volumes:
+      - sbt-data:/root/.ivy2
+      - sbt-data:/root/.cache
+      - .:/opt
+    working_dir: /opt
+    environment:
+      - _JAVA_OPTIONS="-Xmx1g"
+
+volumes:
+  sbt-data:
+    external:
+      name: sbt-data

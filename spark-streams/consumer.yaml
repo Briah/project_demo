@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: kafka
+  labels:
+    app: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      serviceAccountName: kafka
+      containers:
+        - name: consumer
+          image: spark-stream
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_SERVICE
+              value: "10.103.23.230:9092"
+            # - name: DB_HOST
+            #   value: "localhost"
+            # - name: DB_PORT
+            #   value: "9094"
+            - name: DOCKER_IMAGE
+              value: spark-stream
+            - name: SPARK_MASTER_URL
+              value: "local[*]"
+            - name: KEYSPACE
+              value: demo
+            - name: TABLE_NAME
+              value: store
+              # value: k8s://https://kubernetes.docker.internal:6443
+            - name: DEPLOY_MODE
+              value: client
+            - name: TOPIC
+              value: "dummy-topic"
+          envFrom:
+            - secretRef:
+                name: dbcred
+          command: ["/opt/app/run.sh"]
+          args: ["com.rihab.Consumer"]
